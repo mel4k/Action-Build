@@ -1171,7 +1171,9 @@ jobs:
         run: |
           cd kernel_workspace/kernel_platform
           # 修复 getname_flags 内核API参数不兼容
-sed -i 's/getname_flags(filename, lookup_flags, NULL)/getname_flags(filename, lookup_flags)/g' common/fs/open.c
+          sed -i 's/getname_flags(filename, 
+          lookup_flags, NULL)/getname_flags(filename,
+          lookup_flags)/g' common/fs/open.c
 
           # 自动检测 LLVM_IAS
           if [[ -f ./common/build.config.arm ]] && grep -q '^LLVM_IAS=1' ./common/build.config.arm; then
