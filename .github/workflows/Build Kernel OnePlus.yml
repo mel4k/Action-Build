@@ -1171,6 +1171,20 @@ jobs:
         run: |
           cd kernel_workspace/kernel_platform/common
           sed -i 's/getname_flags(filename, lookup_flags, NULL)/getname_flags(filename, lookup_flags)/' fs/open.c
+          # 修复 ReSukiSU Kbuild 子模块校验报错
+          KSU_SRC="$PWD/KernelSU/kernel"
+          if [[ -f "$KSU_SRC/Kbuild" ]]; then
+          sed -i 's/-dirty//g' "$KSU_SRC/Kbuild"
+          sed -i "s|^KSU_SRC :=.*|KSU_SRC := $KSU_SRC|" "$KSU_SRC/Kbuild"
+          echo "✅ KSU_SRC configured to: $KSU_SRC"
+          elif [[ -f "drivers/kernelsu/Kbuild" ]]; then
+          KSU_SRC="$PWD/drivers/kernelsu"
+          sed -i 's/-dirty//g' "$KSU_SRC/Kbuild"
+          sed -i "s|^KSU_SRC :=.*|KSU_SRC := $KSU_SRC|" "$KSU_SRC/Kbuild"
+          echo "✅ KSU_SRC configured to: $KSU_SRC"
+          else
+          echo "⚠️ Warning: KSU Kbuild not found, compile may fail"
+          fi
 
           # 自动检测 LLVM_IAS
           if [[ -f ./common/build.config.arm ]] && grep -q '^LLVM_IAS=1' ./common/build.config.arm; then
