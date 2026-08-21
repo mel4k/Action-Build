@@ -808,15 +808,18 @@ jobs:
       - name: Apply RE_KERNEL
         if: ${{ github.event.inputs.RE_KERNEL == 'true' }}
         run: |
-          RE_DIR="${GITHUB_WORKSPACE}/kernel_workspace/Re-Kernel/LKM-Source"
-          cd kernel_workspace/kernel_platform/common
-          sed -i '/endmenu/i source "drivers/rekernel/Kconfig"' drivers/Kconfig
-          sed -i '$a \#Re-Kernel Support\nobj-$(CONFIG_REKERNEL) += rekernel/' drivers/Makefile
-          mkdir -p drivers/rekernel
-          cp -r "${RE_DIR}"/* drivers/rekernel/
-          if [ -f BUILD.bazel ]; then
-            sed -i '0,/name = "kernel_aarch64",/{/module_implicit_outs/s|,$| + ["drivers/rekernel/rekernel.ko"],|}' BUILD.bazel
-          fi
+           RE_DIR="${GITHUB_WORKSPACE}/kernel_workspace/Re-Kernel/LKM-Source"
+           cd kernel_workspace/kernel_platform/common
+           sed -i '/endmenu/i source "drivers/rekernel/Kconfig"' drivers/Kconfig
+           sed -i '$a \#Re-Kernel Support\nobj-$(CONFIG_REKERNEL) += rekernel/' drivers/Makefile
+           mkdir -p drivers/rekernel
+           cp -r "${RE_DIR}"/* drivers/rekernel/
+    
+           # Install and use buildozer to update BUILD.bazel
+           if [ -f BUILD.bazel ]; then
+           sudo apt-get install -y buildozer 2>/dev/null || pip install buildozer
+           buildozer 'add module_outs drivers/rekernel/rekernel.ko' @@//common:kernel_aarch64
+           fi
 
       - name: Apply DROID_SPACES
         env:
